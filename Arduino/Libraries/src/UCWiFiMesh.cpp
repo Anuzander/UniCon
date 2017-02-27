@@ -1,23 +1,3 @@
-/*
-  UCWiFiMesh.cpp - Mesh network node
-  Sets up a Mesh Node which acts as a router, creating a Mesh Network with other nodes. All information
-  is passed in both directions, but it is up to the user what the data sent is and how it is dealt with.
- 
-  Copyright (c) 2015 Anurag Chauhan. All rights reserved.
- 
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-  This library is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  Lesser General Public License for more details.
-  You should have received a copy of the GNU Lesser General Public
-  License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-*/
-
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h> 
@@ -25,9 +5,9 @@
 
 #include "UCWiFiMesh.h"
 
-#define SSID_PREFIX          "Mesh_Node"
-#define SERVER_IP_ADDR      "192.168.4.1"
-#define SERVER_PORT       4011
+#define SSID_PREFIX         "UniCon"
+#define SERVER_IP_ADDR      "192.168.200.1"
+#define SERVER_PORT         5555
 
 UCWiFiMesh::UCWiFiMesh(uint32_t chip_id, std::function<String(String)> handler)
 : _server(SERVER_PORT)
@@ -44,35 +24,16 @@ void UCWiFiMesh::begin()
   WiFi.softAP( _ssid.c_str() );
     _server.begin();
 }
-
-/**
- * Wait for a WiFiClient to connect
- *
- * @returns: True if the client is ready, false otherwise.
- * 
- */
 bool UCWiFiMesh::waitForClient(WiFiClient curr_client, int max_wait)
 {
   int wait = max_wait;
   while(curr_client.connected() && !curr_client.available() && wait--)
     delay(3);
-
-  /* Return false if the client isn't ready to communicate */
   if (WiFi.status() == WL_DISCONNECTED || !curr_client.connected())
     return false;
   
   return true;
 }
-
-/**
- * Send the supplied message then read back the other node's response
- * and pass that to the user-supplied handler.
- *
- * @target_ssid The name of the AP the other node has set up.
- * @message The string to send to the node.
- * @returns: True if the exchange was a succes, false otherwise.
- * 
- */
 bool UCWiFiMesh::exchangeInfo(String message, WiFiClient curr_client)
 {
   curr_client.println( message.c_str() );
@@ -85,19 +46,9 @@ bool UCWiFiMesh::exchangeInfo(String message, WiFiClient curr_client)
 
   if (response.length() <= 2) 
     return false;
-
-  /* Pass data to user callback */
   _handler(response);
   return true;
 }
-
-/**
- * Connect to the AP at ssid, send them a message then disconnect.
- *
- * @target_ssid The name of the AP the other node has set up.
- * @message The string to send to the node.
- * 
- */
 void UCWiFiMesh::connectToNode(String target_ssid, String message)
 {
   WiFiClient curr_client;
@@ -106,12 +57,8 @@ void UCWiFiMesh::connectToNode(String target_ssid, String message)
   int wait = 1500;
   while((WiFi.status() == WL_DISCONNECTED) && wait--)
     delay(3);
-
-  /* If the connection timed out */
   if (WiFi.status() != 3)
     return;
-
-  /* Connect to the node's server */
   if (!curr_client.connect(SERVER_IP_ADDR, SERVER_PORT)) 
     return;
 
@@ -124,17 +71,13 @@ void UCWiFiMesh::connectToNode(String target_ssid, String message)
 
 void UCWiFiMesh::attemptScan(String message)
 {
-  /* Scan for APs */
   int n = WiFi.scanNetworks();
 
   for (int i = 0; i < n; ++i) {
     String current_ssid = WiFi.SSID(i);
     int index = current_ssid.indexOf( _ssid_prefix );
     uint32_t target_chip_id = (current_ssid.substring(index + _ssid_prefix.length())).toInt();
-
-    /* Connect to any _suitable_ APs which contain _ssid_prefix */
     if (index >= 0 && (target_chip_id < _chip_id)) {
-
       WiFi.mode(WIFI_STA);
       delay(100);
       connectToNode(current_ssid, message);
@@ -154,14 +97,9 @@ void UCWiFiMesh::acceptRequest()
     if (!waitForClient(_client, 1500)) {
       continue;
     }
-
-    /* Read in request and pass it to the supplied handler */
     String request = _client.readStringUntil('\r');
     _client.readStringUntil('\n');
-
     String response = _handler(request);
-
-    /* Send the response back to the client */
     if (_client.connected())
       _client.println(response);
   }
