@@ -3,7 +3,7 @@
 
 UCTimer::UCTimer(){
 	_delay=0;
-	_duration=0;
+	_duration=99999999;
 	currentMillis=millis();
 	previousMillis=millis();
 	pulseMillis=millis();
@@ -14,7 +14,7 @@ UCTimer::UCTimer(unsigned long Delay, unsigned long Duration){
 	_delay=Delay*Multiplier;
 	_duration=Duration*Multiplier;
 	if(Duration<=0){
-		_duration=0;
+		_duration=99999999;
 	}else{
 		_duration = _delay + _duration;
 	}
@@ -32,7 +32,7 @@ void UCTimer::init(unsigned long Delay, unsigned long Duration){
 	_delay=Delay*Multiplier;
 	_duration=Duration*Multiplier;
 	if(Duration<=0){
-		_duration=0;
+		_duration=99999999;
 	}else{
 		_duration = _delay + _duration;
 	}
@@ -49,16 +49,28 @@ bool UCTimer::Pulse(unsigned long Period){
 	}
 }
 bool UCTimer::TimeElapsed(unsigned long Period, bool ReturnValuePostPeriod){
+if(Period==0){
+	return 1;
+}else{
 	currentMillis=millis();
-	if(currentMillis-previousMillis>=Period*Multiplier){
-		return	ReturnValuePostPeriod;
-	}else{
-		return !ReturnValuePostPeriod;
+		if(currentMillis-previousMillis>=Period*Multiplier){
+			return  ReturnValuePostPeriod;
+		}else{
+			return !ReturnValuePostPeriod;
+		}
 	}
 }
 bool UCTimer::DelayElapsed(unsigned long Period){
-	UCTimer::TimeElapsed(Period,1);
+	return UCTimer::TimeElapsed(Period,1);
 }
 bool UCTimer::DurationElapsed(unsigned long Period){
-	UCTimer::TimeElapsed(Period,0);
+	return UCTimer::TimeElapsed(Period,0);
 }
+bool UCTimer::Value(){
+	if(DelayElapsed(_delay)&&DurationElapsed(_duration)){
+		return 1;
+	}else{
+		return 0;
+	}
+}
+

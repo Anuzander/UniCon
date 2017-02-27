@@ -12,6 +12,7 @@ class UCTimer{
 		bool Pulse(unsigned long Period);
 		void init();
 		void init(unsigned long Delay, unsigned long Duration);
+		bool Value();
 	private:
 		unsigned long currentMillis, previousMillis, pulseMillis, _delay, _duration;
 		int Multiplier=1;
