@@ -14,8 +14,14 @@ typedef struct{
 class FileHandler{
   public:
     FileHandler();
-    bool LoadConfig(WifiConfig* wc);
-    bool SaveConfig(WifiConfig* wc);
+    bool LoadWifiConfig(WifiConfig* wc);
+    bool SaveWifiConfig(WifiConfig* wc);
+  
+    bool LoadDeviceConfig(DeviceConfig* dc);
+    bool SaveDeviceConfig(DeviceConfig* dc);
+
+    bool LoadLog(LogData* ld);
+    bool SaveLog(LogData* ld);
 
   private:
   
