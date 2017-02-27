@@ -61,5 +61,10 @@ typedef struct{
   String _ChipId;
 }DeviceConfig;
 
+typedef struct{
+  int _SwitchId;
+  DateTime _Time;
+  int _OnOff;
+}LogData;
 
 #endif
