@@ -3,7 +3,7 @@
 
 FileHandler::FileHandler(){};
 
-bool FileHandler::LoadConfig(WifiConfig* wc){
+bool FileHandler::LoadWifiConfig(WifiConfig* wc){
   bool result = SPIFFS.begin();
   Serial.println("SPIFFS opened: " + result);
   File f = SPIFFS.open("/configuration.txt", "r");
@@ -21,7 +21,7 @@ bool FileHandler::LoadConfig(WifiConfig* wc){
     wc->_Pwd="1234567890";
     wc->_APIP="192.168.100.100";
     wc->_STIP="172.168.100.100";
-    FileHandler::SaveConfig(wc);
+    FileHandler::SaveWifiConfig(wc);
   } else {
     // we could open the file
     //Lets read line by line from the file
@@ -47,7 +47,7 @@ bool FileHandler::LoadConfig(WifiConfig* wc){
   f.close();
 }
 
-bool FileHandler::SaveConfig(WifiConfig* wc){
+bool FileHandler::SaveWifiConfig(WifiConfig* wc){
   bool result = SPIFFS.begin();
   Serial.println("SPIFFS opened: " + result);
   File f = SPIFFS.open("/configuration.txt", "r");
